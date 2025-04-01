@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>欢迎加入求职招聘平台</title>
+  <style>
+    body {
+      font-family: Arial, 'Microsoft YaHei', sans-serif;
+      line-height: 1.6;
+      color: #333;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #ffffff;
+    }
+    .header {
+      text-align: center;
+      padding: 20px 0;
+      background-color: #2563eb;
+      color: white;
+    }
+    .content {
+      padding: 20px;
+    }
+    .button {
+      display: inline-block;
+      padding: 10px 20px;
+      margin: 20px 0;
+      background-color: #2563eb;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: #777;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+    }
+    .benefits {
+      margin: 20px 0;
+      padding: 0;
+    }
+    .benefits li {
+      margin-bottom: 10px;
+      list-style-type: none;
+      padding-left: 25px;
+      position: relative;
+    }
+    .benefits li:before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: #2563eb;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>欢迎加入求职招聘平台</h1>
+    </div>
+    
+    <div class="content">
+      <p>亲爱的 <strong>{{username}}</strong>,</p>
+      
+      <p>感谢您注册我们的求职招聘平台！我们很高兴您加入我们的社区。</p>
+      
+      <p>通过我们的平台，您可以享受以下服务：</p>
+      
+      <ul class="benefits">
+        <li>发布和查看最新的工作机会</li>
+        <li>上传和管理您的简历</li>
+        <li>与雇主直接沟通</li>
+        <li>接收个性化的职位推荐</li>
+        <li>跟踪您的申请进度</li>
+      </ul>
+      
+      <p>您现在可以登录您的账户，开始您的求职或招聘之旅。</p>
+      
+      <div style="text-align: center;">
+        <a href="{{loginUrl}}" class="button">立即登录</a>
+      </div>
+      
+      <p>如果您有任何问题或需要帮助，请随时联系我们的客服团队。</p>
+      
+      <p>祝您在我们平台上有愉快的体验！</p>
+      
+      <p>此致,<br>求职招聘平台团队</p>
+    </div>
+    
+    <div class="footer">
+      <p>这是一封自动发送的邮件，请勿回复。</p>
+      <p>&copy; {{year}} 求职招聘平台，保留所有权利。</p>
+    </div>
+  </div>
+</body>
+</html> 

@@ -1,0 +1,5 @@
+# 忽略所有目录下的dist, node_modules等
+**/dist/
+**/node_modules/
+.idea
+.vscode

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>面试邀请</title>
+  <style>
+    body {
+      font-family: Arial, 'Microsoft YaHei', sans-serif;
+      line-height: 1.6;
+      color: #333;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #ffffff;
+    }
+    .header {
+      text-align: center;
+      padding: 20px 0;
+      background-color: #2563eb;
+      color: white;
+    }
+    .content {
+      padding: 20px;
+    }
+    .button {
+      display: inline-block;
+      padding: 10px 20px;
+      margin: 20px 0;
+      background-color: #2563eb;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: #777;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+    }
+    .interview-details {
+      background-color: #f3f4f6;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    .interview-item {
+      margin-bottom: 10px;
+    }
+    .interview-label {
+      font-weight: bold;
+      margin-right: 10px;
+    }
+    .preparation-tips {
+      background-color: #e0f2fe;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    .preparation-tips h3 {
+      color: #0369a1;
+      margin-top: 0;
+    }
+    .preparation-list {
+      padding-left: 20px;
+    }
+    .preparation-list li {
+      margin-bottom: 8px;
+    }
+    .success-message {
+      background-color: #d1fae5;
+      border-radius: 8px;
+      padding: 15px;
+      text-align: center;
+      margin: 20px 0;
+      font-weight: bold;
+      color: #047857;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>面试邀请</h1>
+    </div>
+    
+    <div class="content">
+      <p>亲爱的 <strong>{{seekerName}}</strong>,</p>
+      
+      <div class="success-message">
+        恭喜您！您的申请已通过初选，我们诚挚邀请您参加面试。
+      </div>
+      
+      <p>我们很高兴通知您，您申请的 <strong>{{companyName}}</strong> 公司 <strong>{{jobTitle}}</strong> 职位的面试邀请已发出。</p>
+      
+      <div class="interview-details">
+        <div class="interview-item">
+          <span class="interview-label">面试时间:</span>
+          <span>{{interviewDate}}</span>
+        </div>
+        <div class="interview-item">
+          <span class="interview-label">面试地点:</span>
+          <span>{{interviewLocation}}</span>
+        </div>
+        <div class="interview-item">
+          <span class="interview-label">面试类型:</span>
+          <span>{{interviewType}}</span>
+        </div>
+        <div class="interview-item">
+          <span class="interview-label">特别说明:</span>
+          <span>{{interviewNotes}}</span>
+        </div>
+      </div>
+      
+      <p>请点击下方按钮确认是否参加面试：</p>
+      
+      <div style="text-align: center;">
+        <a href="{{interviewUrl}}" class="button">查看面试详情</a>
+      </div>
+      
+      <div class="preparation-tips">
+        <h3>面试准备建议</h3>
+        <ul class="preparation-list">
+          <li>提前了解公司背景和职位要求</li>
+          <li>准备好您的作品集或项目经验介绍</li>
+          <li>准备一些您想问面试官的问题</li>
+          <li>提前规划好去面试地点的路线，预留充足时间</li>
+          <li>穿着得体，保持良好的精神状态</li>
+        </ul>
+      </div>
+      
+      <p>如果您对面试有任何疑问，或需要调整面试时间，请尽快与我们联系。</p>
+      
+      <p>祝您面试顺利！</p>
+      
+      <p>此致,<br>{{companyName}} 招聘团队</p>
+    </div>
+    
+    <div class="footer">
+      <p>这是一封自动发送的邮件，请勿回复。</p>
+      <p>&copy; {{year}} 求职招聘平台，保留所有权利。</p>
+    </div>
+  </div>
+</body>
+</html> 

@@ -1,0 +1,60 @@
+// 主题色
+$primary-color: #1890FF;
+$success-color: #4ECB73;
+$warning-color: #FBD437;
+$error-color: #F2637B;
+$info-color: #909399;
+
+// 文字颜色
+$text-main-color: #303133;
+$text-normal-color: #606266;
+$text-light-color: #909399;
+$text-placeholder-color: #C0C4CC;
+
+// 边框颜色
+$border-base-color: #DCDFE6;
+$border-light-color: #E4E7ED;
+$border-lighter-color: #EBEEF5;
+
+// 背景颜色
+$bg-color: #f8f8f8;
+$bg-light-color: #F5F7FA;
+$bg-white-color: #FFFFFF;
+
+// 阴影
+$box-shadow-base: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
+$box-shadow-large: 0 4rpx 20rpx rgba(0, 0, 0, 0.1);
+
+// 尺寸
+$font-size-small: 24rpx;
+$font-size-base: 28rpx;
+$font-size-medium: 32rpx;
+$font-size-large: 36rpx;
+$font-size-larger: 40rpx;
+
+// 行高
+$line-height-base: 1.5;
+$line-height-large: 1.8;
+
+// 边距
+$spacing-mini: 5rpx;
+$spacing-small: 10rpx;
+$spacing-base: 20rpx;
+$spacing-large: 30rpx;
+$spacing-larger: 40rpx;
+
+// 边框圆角
+$border-radius-small: 4rpx;
+$border-radius-base: 8rpx;
+$border-radius-large: 16rpx;
+$border-radius-round: 1000rpx;
+
+// 过渡动画
+$transition-base: all 0.3s ease-in-out;
+
+// 响应式断点
+$screen-xs: 576px;
+$screen-sm: 768px;
+$screen-md: 992px;
+$screen-lg: 1200px;
+$screen-xl: 1600px; 

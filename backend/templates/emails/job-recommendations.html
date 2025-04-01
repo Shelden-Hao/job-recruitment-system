@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>为您推荐的职位</title>
+  <style>
+    body {
+      font-family: Arial, 'Microsoft YaHei', sans-serif;
+      line-height: 1.6;
+      color: #333;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #ffffff;
+    }
+    .header {
+      text-align: center;
+      padding: 20px 0;
+      background-color: #2563eb;
+      color: white;
+    }
+    .content {
+      padding: 20px;
+    }
+    .button {
+      display: inline-block;
+      padding: 10px 20px;
+      margin: 20px 0;
+      background-color: #2563eb;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: #777;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+    }
+    .job-card {
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      padding: 16px;
+      background-color: #f9fafb;
+    }
+    .job-title {
+      color: #2563eb;
+      font-size: 18px;
+      margin: 0 0 8px 0;
+    }
+    .job-company {
+      font-weight: bold;
+      margin: 0 0 8px 0;
+    }
+    .job-details {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .job-detail {
+      background-color: #e5e7eb;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    .match-score {
+      background-color: #dcfce7;
+      color: #166534;
+      font-weight: bold;
+      padding: 4px 8px;
+      border-radius: 4px;
+      display: inline-block;
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+    .job-apply {
+      text-align: right;
+    }
+    .job-apply-link {
+      display: inline-block;
+      padding: 8px 16px;
+      background-color: #2563eb;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>为您推荐的职位</h1>
+    </div>
+    
+    <div class="content">
+      <p>亲爱的 <strong>{{username}}</strong>,</p>
+      
+      <p>根据您的简历和求职偏好，我们为您精选了以下职位，希望能帮助您找到理想的工作：</p>
+      
+      {{#each jobs}}
+      <div class="job-card">
+        <h3 class="job-title">{{title}}</h3>
+        <p class="job-company">{{company}}</p>
+        
+        <div class="job-details">
+          <span class="job-detail">{{location}}</span>
+          <span class="job-detail">{{salary}}</span>
+        </div>
+        
+        <div class="match-score">匹配度: {{matchScore}}</div>
+        
+        <div class="job-apply">
+          <a href="{{url}}" class="job-apply-link">查看详情</a>
+        </div>
+      </div>
+      {{/each}}
+      
+      <p>查看更多为您推荐的职位，请访问我们的网站：</p>
+      
+      <div style="text-align: center;">
+        <a href="{{recommendationsUrl}}" class="button">查看全部推荐</a>
+      </div>
+      
+      <p>祝您求职顺利！</p>
+      
+      <p>此致,<br>求职招聘平台团队</p>
+    </div>
+    
+    <div class="footer">
+      <p>您收到此邮件是因为您在我们的平台上注册并同意接收职位推荐信息。</p>
+      <p>如果您不想再接收此类邮件，请<a href="#">点击此处退订</a>。</p>
+      <p>&copy; {{year}} 求职招聘平台，保留所有权利。</p>
+    </div>
+  </div>
+</body>
+</html> 

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>应聘状态更新</title>
+  <style>
+    body {
+      font-family: Arial, 'Microsoft YaHei', sans-serif;
+      line-height: 1.6;
+      color: #333;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #ffffff;
+    }
+    .header {
+      text-align: center;
+      padding: 20px 0;
+      background-color: #2563eb;
+      color: white;
+    }
+    .content {
+      padding: 20px;
+    }
+    .button {
+      display: inline-block;
+      padding: 10px 20px;
+      margin: 20px 0;
+      background-color: #2563eb;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: #777;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+    }
+    .status-card {
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+      background-color: #f3f4f6;
+    }
+    .status-heading {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+    .status-label {
+      font-weight: bold;
+      margin-right: 10px;
+    }
+    .status-detail {
+      margin-bottom: 10px;
+    }
+    .status-new {
+      background-color: #dbeafe;
+      color: #1e40af;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+    .status-old {
+      background-color: #e5e7eb;
+      color: #4b5563;
+      padding: 5px 10px;
+      border-radius: 4px;
+      text-decoration: line-through;
+    }
+    .status-date {
+      font-size: 14px;
+      color: #6b7280;
+      margin-top: 10px;
+    }
+    .next-steps {
+      background-color: #e0f2fe;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    .next-steps h3 {
+      color: #0369a1;
+      margin-top: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>应聘状态更新</h1>
+    </div>
+    
+    <div class="content">
+      <p>亲爱的 <strong>{{seekerName}}</strong>,</p>
+      
+      <p>您在 <strong>{{companyName}}</strong> 申请的 <strong>{{jobTitle}}</strong> 职位的申请状态已更新。</p>
+      
+      <div class="status-card">
+        <div class="status-heading">状态更新</div>
+        
+        <div class="status-detail">
+          <span class="status-label">旧状态:</span>
+          <span class="status-old">{{oldStatus}}</span>
+        </div>
+        
+        <div class="status-detail">
+          <span class="status-label">新状态:</span>
+          <span class="status-new">{{newStatus}}</span>
+        </div>
+        
+        <div class="status-date">
+          更新时间: {{updateDate}}
+        </div>
+      </div>
+      
+      <div class="next-steps">
+        <h3>接下来您可以做什么</h3>
+        <p>您可以登录我们的平台查看详细的应聘进度和可能的下一步安排。我们会持续更新您的申请状态，并通过邮件及时通知您。</p>
+      </div>
+      
+      <p>查看您的申请详情，请点击下方按钮：</p>
+      
+      <div style="text-align: center;">
+        <a href="{{applicationUrl}}" class="button">查看申请详情</a>
+      </div>
+      
+      <p>如果您有任何问题，请随时与我们联系。</p>
+      
+      <p>祝您求职顺利！</p>
+      
+      <p>此致,<br>求职招聘平台团队</p>
+    </div>
+    
+    <div class="footer">
+      <p>这是一封自动发送的邮件，请勿回复。</p>
+      <p>&copy; {{year}} 求职招聘平台，保留所有权利。</p>
+    </div>
+  </div>
+</body>
+</html> 

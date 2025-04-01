@@ -1,0 +1,181 @@
+{
+  "pages": [
+    {
+      "path": "pages/index/index",
+      "style": {
+        "navigationBarTitleText": "首页"
+      }
+    },
+    {
+      "path": "pages/login/index",
+      "style": {
+        "navigationBarTitleText": "登录"
+      }
+    },
+    {
+      "path": "pages/register/index",
+      "style": {
+        "navigationBarTitleText": "注册"
+      }
+    },
+    {
+      "path": "pages/profile/index",
+      "style": {
+        "navigationBarTitleText": "个人中心"
+      }
+    },
+    {
+      "path": "pages/jobs/index",
+      "style": {
+        "navigationBarTitleText": "职位列表"
+      }
+    },
+    {
+      "path": "pages/jobs/detail",
+      "style": {
+        "navigationBarTitleText": "职位详情"
+      }
+    },
+    {
+      "path": "pages/jobs/list",
+      "style": {
+        "navigationBarTitleText": "职位搜索"
+      }
+    },
+    {
+      "path": "pages/applications/index",
+      "style": {
+        "navigationBarTitleText": "我的申请"
+      }
+    },
+    {
+      "path": "pages/employer/jobs",
+      "style": {
+        "navigationBarTitleText": "我的职位"
+      }
+    },
+    {
+      "path": "pages/employer/applicants",
+      "style": {
+        "navigationBarTitleText": "申请人列表"
+      }
+    },
+    {
+      "path": "pages/employer/publish",
+      "style": {
+        "navigationBarTitleText": "发布职位"
+      }
+    },
+    {
+      "path": "pages/resume/index",
+      "style": {
+        "navigationBarTitleText": "我的简历"
+      }
+    },
+    {
+      "path": "pages/resume/edit",
+      "style": {
+        "navigationBarTitleText": "编辑简历"
+      }
+    },
+    {
+      "path": "pages/messages/index",
+      "style": {
+        "navigationBarTitleText": "消息中心"
+      }
+    },
+    {
+      "path": "pages/messages/chat",
+      "style": {
+        "navigationBarTitleText": "聊天"
+      }
+    },
+    {
+      "path": "pages/statistics/index",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/statistics/salaryDistribution",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/statistics/popularJobs",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/statistics/recruitmentTrends",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/statistics/seekerLocation",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/statistics/systemStats",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/statistics/userStats",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "招聘系统",
+    "navigationBarBackgroundColor": "#F8F8F8",
+    "backgroundColor": "#F8F8F8"
+  },
+  "tabBar": {
+    "color": "#7A7E83",
+    "selectedColor": "#1890FF",
+    "borderStyle": "black",
+    "backgroundColor": "#ffffff",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "iconPath": "static/images/tabbar/home.png",
+        "selectedIconPath": "static/images/tabbar/home-active.png",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/jobs/index",
+        "iconPath": "static/images/tabbar/jobs.png",
+        "selectedIconPath": "static/images/tabbar/jobs-active.png",
+        "text": "职位"
+      },
+      {
+        "pagePath": "pages/messages/index",
+        "iconPath": "static/images/tabbar/message.png",
+        "selectedIconPath": "static/images/tabbar/message-active.png",
+        "text": "消息"
+      },
+      {
+        "pagePath": "pages/statistics/index",
+        "iconPath": "static/images/tabbar/stats.png",
+        "selectedIconPath": "static/images/tabbar/stats-active.png",
+        "text": "统计"
+      },
+      {
+        "pagePath": "pages/profile/index",
+        "iconPath": "static/images/tabbar/profile.png",
+        "selectedIconPath": "static/images/tabbar/profile-active.png",
+        "text": "我的"
+      }
+    ]
+  },
+  "uniIdRouter": {}
+} 
