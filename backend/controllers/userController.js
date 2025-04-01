@@ -1,6 +1,9 @@
 const { Op } = require('sequelize');
 const { User, SeekerProfile, EmployerProfile, UserStatistics } = require('../models');
-const { catchAsync, AppError } = require('../middleware/errorMiddleware');
+const catchAsync = require('../utils/catchAsync');
+const AppError = require('../utils/appError');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 // 获取求职者个人资料
 exports.getSeekerProfile = catchAsync(async (req, res, next) => {
@@ -195,43 +198,27 @@ exports.updateEmployerProfile = catchAsync(async (req, res, next) => {
 
 // 更新用户信息（如用户名、手机号）
 exports.updateUser = catchAsync(async (req, res, next) => {
-  const userId = req.user.id;
+  // 不允许通过此路由更新密码
+  if (req.body.password) {
+    return next(new AppError('请使用专门的密码更新接口', 400));
+  }
+
+  const user = await User.findByPk(req.params.id);
   
-  // 允许更新的字段
-  const allowedFields = ['username', 'phone'];
-  
-  // 过滤请求中的字段
-  const updateData = {};
-  Object.keys(req.body).forEach(key => {
-    if (allowedFields.includes(key)) {
-      updateData[key] = req.body[key];
-    }
-  });
-  
-  // 检查用户名是否已存在
-  if (updateData.username) {
-    const existingUser = await User.findOne({
-      where: {
-        username: updateData.username,
-        id: { [Op.ne]: userId }
-      }
-    });
-    
-    if (existingUser) {
-      return next(new AppError('该用户名已被使用', 400));
-    }
+  if (!user) {
+    return next(new AppError('未找到该用户', 404));
   }
   
-  // 更新用户信息
-  const updatedUser = await User.update(updateData, {
-    where: { id: userId },
-    returning: true
-  });
+  // 过滤不允许更新的字段
+  const filteredBody = filterObj(req.body, 'username', 'email', 'phone', 'avatar', 'role', 'status');
+  
+  // 更新用户
+  await user.update(filteredBody);
   
   res.status(200).json({
     status: 'success',
     data: {
-      user: updatedUser[1][0]
+      user
     }
   });
 });
@@ -363,4 +350,152 @@ const maskEmail = (email) => {
 // 工具函数 - 手机号脱敏
 const maskPhone = (phone) => {
   return phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2');
+};
+
+// 获取当前用户信息
+exports.getMe = catchAsync(async (req, res, next) => {
+  // req.user 是通过 authMiddleware.protect 中间件设置的
+  const user = req.user;
+  
+  // 获取附加信息
+  let profile = null;
+  if (user.role === 'seeker') {
+    profile = await SeekerProfile.findOne({ where: { user_id: user.id } });
+  } else if (user.role === 'employer') {
+    profile = await EmployerProfile.findOne({ where: { user_id: user.id } });
+  }
+  
+  res.status(200).json({
+    status: 'success',
+    data: {
+      user,
+      profile
+    }
+  });
+});
+
+// 更新当前用户信息
+exports.updateMe = catchAsync(async (req, res, next) => {
+  // 不允许通过此路由更新密码
+  if (req.body.password) {
+    return next(new AppError('此路由不用于密码更新，请使用 /update-password', 400));
+  }
+  
+  // 过滤不允许更新的字段
+  const filteredBody = filterObj(req.body, 'username', 'email', 'phone', 'avatar');
+  
+  // 更新用户
+  const updatedUser = await User.update(filteredBody, {
+    where: { id: req.user.id },
+    returning: true
+  });
+  
+  res.status(200).json({
+    status: 'success',
+    data: {
+      user: updatedUser[1][0]
+    }
+  });
+});
+
+// 更新密码
+exports.updatePassword = catchAsync(async (req, res, next) => {
+  const { currentPassword, newPassword } = req.body;
+  
+  // 验证当前密码
+  const user = await User.findByPk(req.user.id, {
+    attributes: { include: ['password'] }
+  });
+  
+  if (!(await bcrypt.compare(currentPassword, user.password))) {
+    return next(new AppError('当前密码不正确', 401));
+  }
+  
+  // 更新密码
+  user.password = newPassword; // 会在模型中自动加密
+  user.password_changed_at = new Date();
+  await user.save();
+  
+  // 返回新的JWT
+  const token = jwt.sign(
+    { id: user.id },
+    process.env.JWT_SECRET,
+    { expiresIn: process.env.JWT_EXPIRES_IN }
+  );
+  
+  res.status(200).json({
+    status: 'success',
+    token,
+    message: '密码已成功更新'
+  });
+});
+
+// 获取所有用户（管理员功能）
+exports.getAllUsers = catchAsync(async (req, res, next) => {
+  const users = await User.findAll({
+    attributes: { exclude: ['password'] }
+  });
+  
+  res.status(200).json({
+    status: 'success',
+    results: users.length,
+    data: {
+      users
+    }
+  });
+});
+
+// 获取单个用户（管理员功能）
+exports.getUser = catchAsync(async (req, res, next) => {
+  const user = await User.findByPk(req.params.id, {
+    attributes: { exclude: ['password'] }
+  });
+  
+  if (!user) {
+    return next(new AppError('未找到该用户', 404));
+  }
+  
+  res.status(200).json({
+    status: 'success',
+    data: {
+      user
+    }
+  });
+});
+
+// 创建用户（管理员功能）
+exports.createUser = catchAsync(async (req, res, next) => {
+  const newUser = await User.create(req.body);
+  
+  res.status(201).json({
+    status: 'success',
+    data: {
+      user: newUser
+    }
+  });
+});
+
+// 更新用户（管理员功能）
+exports.deleteUser = catchAsync(async (req, res, next) => {
+  const user = await User.findByPk(req.params.id);
+  
+  if (!user) {
+    return next(new AppError('未找到该用户', 404));
+  }
+  
+  await user.destroy();
+  
+  res.status(204).json({
+    status: 'success',
+    data: null
+  });
+});
+
+// 工具函数 - 过滤对象属性
+const filterObj = (obj, ...allowedFields) => {
+  const newObj = {};
+  Object.keys(obj).forEach(el => {
+    if (allowedFields.includes(el)) newObj[el] = obj[el];
+  });
+  return newObj;
 }; 

@@ -1,60 +1,172 @@
-// 主题色
-$primary-color: #1890FF;
-$success-color: #4ECB73;
-$warning-color: #FBD437;
-$error-color: #F2637B;
-$info-color: #909399;
+/* 主题色 */
+$color-primary: #1890FF;
+$color-success: #52c41a;
+$color-warning: #faad14;
+$color-danger: #f5222d;
+$color-info: #909399;
 
-// 文字颜色
-$text-main-color: #303133;
-$text-normal-color: #606266;
-$text-light-color: #909399;
-$text-placeholder-color: #C0C4CC;
+/* 文本颜色 */
+$text-color-primary: #303133;   // 主要文字
+$text-color-regular: #606266;   // 常规文字
+$text-color-secondary: #909399; // 次要文字
+$text-color-placeholder: #C0C4CC; // 占位文字
 
-// 边框颜色
-$border-base-color: #DCDFE6;
-$border-light-color: #E4E7ED;
-$border-lighter-color: #EBEEF5;
+/* 背景颜色 */
+$bg-color: #f5f7fa;
+$bg-color-light: #f8f8f8;
 
-// 背景颜色
-$bg-color: #f8f8f8;
-$bg-light-color: #F5F7FA;
-$bg-white-color: #FFFFFF;
+/* 边框颜色 */
+$border-color: #EBEEF5;
+$border-color-light: #F2F6FC;
 
-// 阴影
-$box-shadow-base: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
-$box-shadow-large: 0 4rpx 20rpx rgba(0, 0, 0, 0.1);
+/* 字体大小 */
+$font-size-xs: 10px;
+$font-size-sm: 12px;
+$font-size-md: 14px;
+$font-size-lg: 16px;
+$font-size-xl: 18px;
 
-// 尺寸
-$font-size-small: 24rpx;
-$font-size-base: 28rpx;
-$font-size-medium: 32rpx;
-$font-size-large: 36rpx;
-$font-size-larger: 40rpx;
+/* 行高 */
+$line-height-tight: 1.2;
+$line-height-normal: 1.5;
+$line-height-loose: 1.8;
 
-// 行高
-$line-height-base: 1.5;
-$line-height-large: 1.8;
+/* 间距 */
+$padding-xs: 5px;
+$padding-sm: 10px;
+$padding-md: 15px;
+$padding-lg: 20px;
+$padding-xl: 25px;
+$padding-base: $padding-md;
 
-// 边距
-$spacing-mini: 5rpx;
-$spacing-small: 10rpx;
-$spacing-base: 20rpx;
-$spacing-large: 30rpx;
-$spacing-larger: 40rpx;
+/* 圆角 */
+$border-radius-sm: 2px;
+$border-radius-md: 4px;
+$border-radius-lg: 8px;
+$border-radius-circle: 50%;
 
-// 边框圆角
-$border-radius-small: 4rpx;
-$border-radius-base: 8rpx;
-$border-radius-large: 16rpx;
-$border-radius-round: 1000rpx;
+/* 阴影 */
+$box-shadow-light: 0 1px 2px rgba(0, 0, 0, 0.05);
+$box-shadow-base: 0 1px 4px rgba(0, 0, 0, 0.1);
+$box-shadow-dark: 0 2px 6px rgba(0, 0, 0, 0.15);
 
-// 过渡动画
-$transition-base: all 0.3s ease-in-out;
+/* 动画时间 */
+$animation-duration-fast: 0.2s;
+$animation-duration-base: 0.3s;
+$animation-duration-slow: 0.5s;
 
-// 响应式断点
-$screen-xs: 576px;
-$screen-sm: 768px;
-$screen-md: 992px;
-$screen-lg: 1200px;
-$screen-xl: 1600px; 
+/* z-index层级 */
+$z-index-normal: 1;
+$z-index-dropdown: 10;
+$z-index-sticky: 20;
+$z-index-fixed: 30;
+$z-index-modal-backdrop: 40;
+$z-index-modal: 50;
+$z-index-popover: 60;
+$z-index-tooltip: 70;
+
+/* 尺寸变量 */
+$navbar-height: 44px;
+$tabbar-height: 50px;
+$safe-area-inset-bottom: 34px;
+
+/* 透明度 */
+$opacity-disabled: 0.5;
+$opacity-mask: 0.7;
+
+/* 输入框相关 */
+$input-height: 44px;
+$input-border-radius: $border-radius-md;
+$input-bg-color: #fff;
+
+/* 按钮相关 */
+$button-height-mini: 28px;
+$button-height-small: 32px;
+$button-height-default: 40px;
+$button-height-large: 48px;
+
+/* 标签相关 */
+$tag-font-size: $font-size-sm;
+$tag-border-radius: $border-radius-sm;
+$tag-padding-vertical: 2px;
+$tag-padding-horizontal: 5px;
+
+/* 分割线 */
+$divider-color: $border-color;
+$divider-margin: $padding-md 0;
+
+/* 占位图相关 */
+$placeholder-color: $text-color-placeholder;
+$placeholder-font-size: $font-size-md;
+
+/* 加载动画相关 */
+$loading-icon-size: 20px;
+$loading-text-font-size: $font-size-md;
+$loading-text-color: $text-color-secondary;
+
+/* 头像相关 */
+$avatar-size-mini: 24px;
+$avatar-size-small: 32px;
+$avatar-size-default: 40px;
+$avatar-size-large: 56px;
+
+/* 徽标相关 */
+$badge-font-size: $font-size-xs;
+$badge-bg-color: $color-danger;
+$badge-color: #fff;
+$badge-size: 16px;
+$badge-dot-size: 8px;
+$badge-padding: 0 5px;
+
+/* 列表相关 */
+$list-item-height: 50px;
+$list-item-padding: 0 $padding-md;
+$list-icon-margin-right: $padding-sm;
+$list-text-color: $text-color-regular;
+$list-title-font-size: $font-size-md;
+$list-desc-font-size: $font-size-sm;
+$list-desc-color: $text-color-secondary;
+
+/* 卡片相关 */
+$card-bg-color: #fff;
+$card-padding: $padding-md;
+$card-margin-bottom: $padding-md;
+$card-border-radius: $border-radius-md;
+$card-box-shadow: $box-shadow-light;
+$card-header-padding: $padding-md;
+$card-footer-padding: $padding-sm $padding-md;
+$card-title-font-size: $font-size-lg;
+$card-title-color: $text-color-primary;
+$card-content-padding: $padding-md;
+$card-content-margin-top: $padding-sm;
+
+/* 表单相关 */
+$form-item-margin-bottom: $padding-md;
+$form-item-label-width: 80px;
+$form-item-label-color: $text-color-regular;
+$form-item-label-font-size: $font-size-md;
+$form-item-content-min-height: $input-height;
+$form-item-error-color: $color-danger;
+$form-item-error-font-size: $font-size-sm;
+
+/* 标签页相关 */
+$tabs-nav-height: 40px;
+$tabs-nav-font-size: $font-size-md;
+$tabs-nav-active-color: $color-primary;
+$tabs-nav-inactive-color: $text-color-regular;
+$tabs-nav-border-color: $border-color;
+$tabs-nav-item-padding: 0 $padding-md;
+$tabs-content-padding: $padding-md 0;
+
+/* 对话框相关 */
+$dialog-width: 80%;
+$dialog-border-radius: $border-radius-lg;
+$dialog-bg-color: #fff;
+$dialog-header-padding: $padding-md;
+$dialog-content-padding: $padding-md;
+$dialog-footer-padding: $padding-sm $padding-md;
+$dialog-mask-bg-color: rgba(0, 0, 0, $opacity-mask);
+$dialog-title-font-size: $font-size-lg;
+$dialog-content-font-size: $font-size-md;
+$dialog-btn-font-size: $font-size-md;
+$dialog-btn-height: 44px; 

@@ -2,7 +2,8 @@ const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/database');
 const User = require('./User');
 const Job = require('./Job');
-const privacyMiddleware = require('./middleware/privacyMiddleware');
+// 由于我们暂时不知道privacyMiddleware的正确路径，先注释掉这一行
+// const privacyMiddleware = require('./middleware/privacyMiddleware');
 
 const Application = sequelize.define('Application', {
   id: {

@@ -2,7 +2,7 @@ const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/database');
 const User = require('./User');
 const Job = require('./Job');
-const Application = require('./Application');
+const JobApplication = require('./JobApplication');
 
 const Interview = sequelize.define('Interview', {
   id: {
@@ -14,7 +14,7 @@ const Interview = sequelize.define('Interview', {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: Application,
+      model: JobApplication,
       key: 'id'
     }
   },
@@ -155,8 +155,8 @@ const Interview = sequelize.define('Interview', {
 });
 
 // 关联关系
-Application.hasMany(Interview, { foreignKey: 'application_id', as: 'interviews' });
-Interview.belongsTo(Application, { foreignKey: 'application_id' });
+JobApplication.hasMany(Interview, { foreignKey: 'application_id', as: 'interviews' });
+Interview.belongsTo(JobApplication, { foreignKey: 'application_id' });
 
 Job.hasMany(Interview, { foreignKey: 'job_id', as: 'interviews' });
 Interview.belongsTo(Job, { foreignKey: 'job_id' });

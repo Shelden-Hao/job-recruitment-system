@@ -1,7 +1,10 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const { User, SeekerProfile, EmployerProfile } = require('../models');
-const { catchAsync, AppError } = require('../middleware/errorMiddleware');
+const { User, SeekerProfile, EmployerProfile, UserStatistics } = require('../models');
+const catchAsync = require('../utils/catchAsync');
+const AppError = require('../utils/appError');
+const { promisify } = require('util');
+const { Op } = require('sequelize');
 
 // 生成JWT令牌
 const signToken = (id) => {
@@ -11,100 +14,100 @@ const signToken = (id) => {
 };
 
 // 创建并发送令牌
-const createSendToken = (user, statusCode, req, res) => {
+const createSendToken = (user, statusCode, res) => {
   const token = signToken(user.id);
   
-  // 在响应中发送令牌
+  // 移除敏感信息
+  const safeUser = user.toJSON();
+  delete safeUser.password;
+  
   res.status(statusCode).json({
     status: 'success',
     token,
     data: {
-      user
+      user: safeUser
     }
   });
 };
 
 // 注册用户
 exports.register = catchAsync(async (req, res, next) => {
-  // 1) 从请求体获取数据
-  const { username, email, password, role, phone } = req.body;
+  const { username, email, password, phone, role } = req.body;
   
-  // 2) 检查必要字段
-  if (!username || !email || !password) {
-    return next(new AppError('请提供用户名、邮箱和密码', 400));
+  // 验证邮箱格式
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return next(new AppError('请提供有效的邮箱地址', 400));
   }
   
-  // 3) 检查该邮箱或用户名是否已被使用
-  const existingUser = await User.findOne({ 
-    where: {
-      [Op.or]: [{ email }, { username }]
-    }
-  });
-  
+  // 检查邮箱是否已存在
+  const existingUser = await User.findOne({ where: { email } });
   if (existingUser) {
-    return next(new AppError('该用户名或邮箱已被注册', 400));
+    return next(new AppError('该邮箱已被注册', 400));
   }
   
-  // 4) 创建新用户
-  const newUser = await User.create({
+  // 创建用户
+  const user = await User.create({
     username,
     email,
-    password, // 密码会在模型的beforeCreate钩子中自动哈希
+    password, // 会在模型中自动加密
+    phone,
     role: role || 'seeker', // 默认为求职者
-    phone: phone || null,
-    last_login: new Date()
+    status: 'active'
   });
   
-  // 5) 根据用户角色创建对应的资料
-  if (newUser.role === 'seeker') {
+  // 根据角色创建相应的档案
+  if (user.role === 'seeker') {
     await SeekerProfile.create({
-      user_id: newUser.id,
-      full_name: username // 初始时使用用户名作为全名
+      user_id: user.id,
+      is_public: false
     });
-  } else if (newUser.role === 'employer') {
+  } else if (user.role === 'employer') {
     await EmployerProfile.create({
-      user_id: newUser.id,
-      company_name: req.body.company_name || '未设置公司名称',
-      industry: req.body.industry || '未设置行业'
+      user_id: user.id
     });
   }
   
-  // 6) 生成JWT并发送响应
-  createSendToken(newUser, 201, req, res);
+  // 创建统计信息
+  await UserStatistics.create({
+    user_id: user.id
+  });
+  
+  // 生成并发送令牌
+  createSendToken(user, 201, res);
 });
 
 // 用户登录
 exports.login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
   
-  // 1) 检查是否提供了邮箱和密码
+  // 检查是否提供了邮箱和密码
   if (!email || !password) {
     return next(new AppError('请提供邮箱和密码', 400));
   }
   
-  // 2) 检查用户是否存在
-  const user = await User.findOne({ where: { email } });
-  if (!user) {
-    return next(new AppError('邮箱或密码不正确', 401));
+  // 查找用户
+  const user = await User.findOne({ 
+    where: { email },
+    attributes: { include: ['password'] } // 确保包含密码字段
+  });
+  
+  // 检查用户是否存在且密码是否正确
+  if (!user || !(await bcrypt.compare(password, user.password))) {
+    return next(new AppError('邮箱或密码错误', 401));
   }
   
-  // 3) 验证密码是否正确
-  const isPasswordCorrect = await user.validatePassword(password);
-  if (!isPasswordCorrect) {
-    return next(new AppError('邮箱或密码不正确', 401));
+  // 检查账号是否激活
+  if (user.status !== 'active') {
+    return next(new AppError('您的账号已被禁用，请联系管理员', 401));
   }
   
-  // 4) 如果用户被封禁
-  if (user.status === 'blocked') {
-    return next(new AppError('您的账户已被封禁，请联系管理员', 403));
-  }
-  
-  // 5) 更新最后登录时间
+  // 更新最后登录时间
   user.last_login = new Date();
   await user.save();
   
-  // 6) 生成JWT并发送响应
-  createSendToken(user, 200, req, res);
+  // 生成并发送令牌
+  createSendToken(user, 200, res);
 });
 
 // 获取当前用户信息
@@ -146,25 +149,107 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   await user.save();
   
   // 4) 重新登录用户，生成新的JWT
-  createSendToken(user, 200, req, res);
+  createSendToken(user, 200, res);
 });
 
-// 忘记密码 - 发送重置邮件
+// 忘记密码
 exports.forgotPassword = catchAsync(async (req, res, next) => {
-  // 在实际应用中，这里需要实现发送重置密码邮件的逻辑
-  // 本例简化处理
+  const { email } = req.body;
+  
+  if (!email) {
+    return next(new AppError('请提供邮箱地址', 400));
+  }
+  
+  // 查找用户
+  const user = await User.findOne({ where: { email } });
+  if (!user) {
+    return next(new AppError('此邮箱地址未注册', 404));
+  }
+  
+  // 生成重置令牌
+  const resetToken = Math.random().toString(36).substring(2, 15);
+  const resetTokenExpires = new Date(Date.now() + 10 * 60 * 1000); // 10分钟后过期
+  
+  // 保存重置令牌到用户记录
+  user.reset_token = resetToken;
+  user.reset_token_expires = resetTokenExpires;
+  await user.save();
+  
+  // TODO: 发送重置密码邮件
+  
   res.status(200).json({
     status: 'success',
-    message: '重置密码的说明已发送到您的邮箱'
+    message: '重置密码的链接已发送到您的邮箱'
   });
 });
 
 // 重置密码
 exports.resetPassword = catchAsync(async (req, res, next) => {
-  // 在实际应用中，这里需要实现验证重置令牌和更新密码的逻辑
-  // 本例简化处理
-  res.status(200).json({
-    status: 'success',
-    message: '密码重置成功'
+  const { token, password } = req.body;
+  
+  if (!token || !password) {
+    return next(new AppError('请提供重置令牌和新密码', 400));
+  }
+  
+  // 查找具有有效重置令牌的用户
+  const user = await User.findOne({
+    where: {
+      reset_token: token,
+      reset_token_expires: { [Op.gt]: new Date() }
+    }
   });
-}); 
+  
+  if (!user) {
+    return next(new AppError('令牌无效或已过期', 400));
+  }
+  
+  // 更新密码
+  user.password = password; // 会在模型中自动加密
+  user.reset_token = null;
+  user.reset_token_expires = null;
+  await user.save();
+  
+  // 生成并发送新的JWT令牌
+  createSendToken(user, 200, res);
+});
+
+// 中间件：保护路由（需要登录）
+exports.protect = catchAsync(async (req, res, next) => {
+  // 获取令牌
+  let token;
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    token = req.headers.authorization.split(' ')[1];
+  }
+  
+  if (!token) {
+    return next(new AppError('您未登录，请先登录', 401));
+  }
+  
+  // 验证令牌
+  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+  
+  // 检查用户是否仍然存在
+  const user = await User.findByPk(decoded.id);
+  if (!user) {
+    return next(new AppError('此令牌关联的用户不存在', 401));
+  }
+  
+  // 如果用户修改了密码，检查令牌是否在密码修改之前签发
+  if (user.password_changed_at && decoded.iat < user.password_changed_at.getTime() / 1000) {
+    return next(new AppError('用户最近修改了密码，请重新登录', 401));
+  }
+  
+  // 将用户信息添加到请求对象
+  req.user = user;
+  next();
+});
+
+// 限制角色访问
+exports.restrictTo = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return next(new AppError('您没有权限执行此操作', 403));
+    }
+    next();
+  };
+}; 

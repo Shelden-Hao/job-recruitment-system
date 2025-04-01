@@ -1,5 +1,6 @@
-const { Interview, Job, JobApplication, User, SeekerProfile, EmployerProfile, UserStatistics } = require('../models');
-const { catchAsync, AppError } = require('../middleware/errorMiddleware');
+const { Interview, Job, JobApplication, User, SeekerProfile, EmployerProfile, UserStatistics, JobStatistics } = require('../models');
+const catchAsync = require('../utils/catchAsync');
+const AppError = require('../utils/appError');
 const { Op } = require('sequelize');
 
 // 创建面试
@@ -511,4 +512,530 @@ const incrementInterviewStats = async (jobId, employerId) => {
 const maskEmail = (email) => {
   const [name, domain] = email.split('@');
   return `${name.substring(0, 2)}***@${domain}`;
-}; 
+};
+
+// 获取求职者的面试列表
+exports.getCandidateInterviews = catchAsync(async (req, res, next) => {
+  const userId = req.user.id;
+  
+  // 检查用户是否为求职者
+  if (req.user.role !== 'seeker' && req.user.role !== 'admin') {
+    return next(new AppError('只有求职者可以查看此列表', 403));
+  }
+  
+  // 构建查询条件
+  const where = {
+    seeker_id: userId
+  };
+  
+  // 按状态筛选（如果提供）
+  if (req.query.status) {
+    where.status = req.query.status;
+  }
+  
+  // 执行查询
+  const interviews = await Interview.findAll({
+    where,
+    include: [
+      {
+        model: Job,
+        attributes: ['id', 'title', 'location', 'job_type']
+      },
+      {
+        model: User,
+        as: 'employer',
+        attributes: ['id', 'username', 'avatar'],
+        include: [
+          {
+            model: EmployerProfile,
+            as: 'employerProfile',
+            attributes: ['company_name', 'company_logo']
+          }
+        ]
+      }
+    ],
+    order: [['scheduled_time', 'DESC']]
+  });
+  
+  res.status(200).json({
+    status: 'success',
+    results: interviews.length,
+    data: {
+      interviews
+    }
+  });
+});
+
+// 获取求职者的单个面试详情
+exports.getCandidateInterview = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+  
+  // 查找面试
+  const interview = await Interview.findOne({
+    where: {
+      id,
+      seeker_id: userId
+    },
+    include: [
+      {
+        model: Job,
+        attributes: ['id', 'title', 'description', 'location', 'job_type']
+      },
+      {
+        model: User,
+        as: 'employer',
+        attributes: ['id', 'username', 'avatar'],
+        include: [
+          {
+            model: EmployerProfile,
+            as: 'employerProfile',
+            attributes: ['company_name', 'company_logo', 'industry', 'company_size']
+          }
+        ]
+      }
+    ]
+  });
+  
+  if (!interview) {
+    return next(new AppError('未找到面试记录或无权查看', 404));
+  }
+  
+  res.status(200).json({
+    status: 'success',
+    data: {
+      interview
+    }
+  });
+});
+
+// 求职者提供面试反馈
+exports.provideCandidateFeedback = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
+  const { feedback, rating } = req.body;
+  const userId = req.user.id;
+  
+  // 验证反馈内容
+  if (!feedback) {
+    return next(new AppError('请提供面试反馈内容', 400));
+  }
+  
+  // 查找面试
+  const interview = await Interview.findOne({
+    where: {
+      id,
+      seeker_id: userId
+    }
+  });
+  
+  if (!interview) {
+    return next(new AppError('未找到面试记录或无权操作', 404));
+  }
+  
+  // 检查面试是否已完成
+  if (interview.status !== 'completed') {
+    return next(new AppError('只能为已完成的面试提供反馈', 400));
+  }
+  
+  // 更新面试反馈
+  await interview.update({
+    seeker_feedback: feedback,
+    seeker_rating: rating || 0
+  });
+  
+  res.status(200).json({
+    status: 'success',
+    data: {
+      interview
+    }
+  });
+});
+
+// 求职者确认面试
+exports.confirmInterview = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+  
+  // 查找面试
+  const interview = await Interview.findOne({
+    where: {
+      id,
+      seeker_id: userId
+    }
+  });
+  
+  if (!interview) {
+    return next(new AppError('未找到面试记录或无权操作', 404));
+  }
+  
+  // 检查面试状态
+  if (interview.status !== 'scheduled' && interview.status !== 'rescheduled') {
+    return next(new AppError('此面试状态无法确认', 400));
+  }
+  
+  // 更新面试状态
+  await interview.update({
+    status: 'confirmed',
+    seeker_confirmed: true
+  });
+  
+  res.status(200).json({
+    status: 'success',
+    data: {
+      interview
+    }
+  });
+});
+
+// 求职者请求重新安排面试
+exports.requestReschedule = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
+  const { preferred_time, reason } = req.body;
+  const userId = req.user.id;
+  
+  // 验证必要字段
+  if (!preferred_time) {
+    return next(new AppError('请提供期望的面试时间', 400));
+  }
+  
+  // 查找面试
+  const interview = await Interview.findOne({
+    where: {
+      id,
+      seeker_id: userId
+    }
+  });
+  
+  if (!interview) {
+    return next(new AppError('未找到面试记录或无权操作', 404));
+  }
+  
+  // 检查面试状态
+  if (interview.status === 'completed' || interview.status === 'cancelled') {
+    return next(new AppError('此面试状态无法重新安排', 400));
+  }
+  
+  // 更新面试状态
+  await interview.update({
+    reschedule_request: true,
+    preferred_time: new Date(preferred_time),
+    reschedule_reason: reason || '求职者要求重新安排面试时间',
+    reschedule_requested_by: 'seeker'
+  });
+  
+  res.status(200).json({
+    status: 'success',
+    message: '已成功提交重新安排面试的请求',
+    data: {
+      interview
+    }
+  });
+});
+
+// 求职者取消面试
+exports.cancelInterview = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
+  const { reason } = req.body;
+  const userId = req.user.id;
+  
+  // 查找面试
+  const interview = await Interview.findOne({
+    where: {
+      id,
+      seeker_id: userId
+    }
+  });
+  
+  if (!interview) {
+    return next(new AppError('未找到面试记录或无权操作', 404));
+  }
+  
+  // 检查面试状态
+  if (interview.status === 'completed' || interview.status === 'cancelled') {
+    return next(new AppError('此面试状态无法取消', 400));
+  }
+  
+  // 更新面试状态
+  await interview.update({
+    status: 'cancelled',
+    cancellation_reason: reason || '求职者取消',
+    cancelled_by: 'seeker'
+  });
+  
+  res.status(200).json({
+    status: 'success',
+    message: '面试已成功取消',
+    data: {
+      interview
+    }
+  });
+});
+
+// 获取企业用户的面试列表
+exports.getEmployerInterviews = catchAsync(async (req, res, next) => {
+  const userId = req.user.id;
+  
+  // 检查用户是否为企业用户
+  if (req.user.role !== 'employer' && req.user.role !== 'admin') {
+    return next(new AppError('只有企业用户可以查看此列表', 403));
+  }
+  
+  // 构建查询条件
+  const where = {
+    employer_id: userId
+  };
+  
+  // 按状态筛选（如果提供）
+  if (req.query.status) {
+    where.status = req.query.status;
+  }
+  
+  // 执行查询
+  const interviews = await Interview.findAll({
+    where,
+    include: [
+      {
+        model: Job,
+        attributes: ['id', 'title', 'location', 'job_type']
+      },
+      {
+        model: User,
+        as: 'seeker',
+        attributes: ['id', 'username', 'avatar'],
+        include: [
+          {
+            model: SeekerProfile,
+            as: 'seekerProfile',
+            attributes: ['full_name', 'current_title']
+          }
+        ]
+      }
+    ],
+    order: [['scheduled_time', 'DESC']]
+  });
+  
+  res.status(200).json({
+    status: 'success',
+    results: interviews.length,
+    data: {
+      interviews
+    }
+  });
+});
+
+// 获取企业用户的单个面试详情
+exports.getEmployerInterview = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+  
+  // 查找面试
+  const interview = await Interview.findOne({
+    where: {
+      id,
+      employer_id: userId
+    },
+    include: [
+      {
+        model: Job,
+        attributes: ['id', 'title', 'description', 'location', 'job_type']
+      },
+      {
+        model: User,
+        as: 'seeker',
+        attributes: ['id', 'username', 'avatar', 'email'],
+        include: [
+          {
+            model: SeekerProfile,
+            as: 'seekerProfile',
+            attributes: ['full_name', 'education_level', 'school', 'major', 'work_experience_years', 'current_title']
+          }
+        ]
+      },
+      {
+        model: JobApplication,
+        attributes: ['id', 'resume_url', 'cover_letter']
+      }
+    ]
+  });
+  
+  if (!interview) {
+    return next(new AppError('未找到面试记录或无权查看', 404));
+  }
+  
+  res.status(200).json({
+    status: 'success',
+    data: {
+      interview
+    }
+  });
+});
+
+// 企业用户安排面试
+exports.scheduleInterview = catchAsync(async (req, res, next) => {
+  const {
+    job_id,
+    application_id,
+    seeker_id,
+    scheduled_time,
+    duration_minutes,
+    interview_type,
+    location,
+    online_meeting_link,
+    description
+  } = req.body;
+  
+  // 验证必填字段
+  if (!job_id || !application_id || !seeker_id || !scheduled_time || !interview_type) {
+    return next(new AppError('缺少必要的信息', 400));
+  }
+  
+  // 检查用户是否为企业用户
+  if (req.user.role !== 'employer' && req.user.role !== 'admin') {
+    return next(new AppError('只有企业用户可以安排面试', 403));
+  }
+  
+  // 查找申请记录
+  const application = await JobApplication.findOne({
+    where: {
+      id: application_id,
+      job_id,
+      user_id: seeker_id
+    },
+    include: [{
+      model: Job,
+      attributes: ['employer_id']
+    }]
+  });
+  
+  if (!application) {
+    return next(new AppError('未找到匹配的申请记录', 404));
+  }
+  
+  // 检查权限
+  if (application.Job.employer_id !== req.user.id && req.user.role !== 'admin') {
+    return next(new AppError('您没有权限为此申请安排面试', 403));
+  }
+  
+  // 创建面试记录
+  const interview = await Interview.create({
+    job_id,
+    application_id,
+    employer_id: req.user.id,
+    seeker_id,
+    scheduled_time: new Date(scheduled_time),
+    duration_minutes: duration_minutes || 60,
+    interview_type,
+    location,
+    online_meeting_link,
+    description,
+    status: 'scheduled'
+  });
+  
+  // 更新申请状态
+  await application.update({ status: 'interview' });
+  
+  res.status(201).json({
+    status: 'success',
+    data: {
+      interview
+    }
+  });
+});
+
+// 企业用户更新面试结果
+exports.updateInterviewResult = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
+  const { result, feedback, next_steps } = req.body;
+  const userId = req.user.id;
+  
+  // 验证结果
+  if (!result || !['pass', 'fail', 'pending'].includes(result)) {
+    return next(new AppError('请提供有效的面试结果', 400));
+  }
+  
+  // 查找面试
+  const interview = await Interview.findOne({
+    where: {
+      id,
+      employer_id: userId
+    },
+    include: [{
+      model: JobApplication,
+      attributes: ['id', 'status']
+    }]
+  });
+  
+  if (!interview) {
+    return next(new AppError('未找到面试记录或无权操作', 404));
+  }
+  
+  // 检查面试状态
+  if (interview.status !== 'completed') {
+    await interview.update({ status: 'completed' });
+  }
+  
+  // 更新面试结果
+  await interview.update({
+    result,
+    employer_feedback: feedback || interview.employer_feedback,
+    next_steps
+  });
+  
+  // 更新申请状态
+  if (interview.JobApplication) {
+    let applicationStatus = 'interview_completed';
+    if (result === 'pass') {
+      applicationStatus = 'offer';
+    } else if (result === 'fail') {
+      applicationStatus = 'rejected';
+    }
+    
+    await interview.JobApplication.update({ status: applicationStatus });
+  }
+  
+  res.status(200).json({
+    status: 'success',
+    data: {
+      interview
+    }
+  });
+});
+
+// 企业用户取消面试
+exports.cancelInterviewByEmployer = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
+  const { reason } = req.body;
+  const userId = req.user.id;
+  
+  // 查找面试
+  const interview = await Interview.findOne({
+    where: {
+      id,
+      employer_id: userId
+    }
+  });
+  
+  if (!interview) {
+    return next(new AppError('未找到面试记录或无权操作', 404));
+  }
+  
+  // 检查面试状态
+  if (interview.status === 'completed' || interview.status === 'cancelled') {
+    return next(new AppError('此面试状态无法取消', 400));
+  }
+  
+  // 更新面试状态
+  await interview.update({
+    status: 'cancelled',
+    cancellation_reason: reason || '企业取消',
+    cancelled_by: 'employer'
+  });
+  
+  res.status(200).json({
+    status: 'success',
+    message: '面试已成功取消',
+    data: {
+      interview
+    }
+  });
+}); 

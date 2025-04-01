@@ -1,31 +1,30 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/database');
-const User = require('./User');
 
 // 聊天会话模型
-const ChatRoom = sequelize.define('ChatRoom', {
+const Chat = sequelize.define('Chat', {
   id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true
   },
-  employer_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: User,
-      key: 'id'
-    }
-  },
-  seeker_id: {
+  employerId: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: User,
+      model: 'Users',
       key: 'id'
     }
   },
-  job_id: {
+  seekerId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'Users',
+      key: 'id'
+    }
+  },
+  jobId: {
     type: DataTypes.INTEGER,
     allowNull: true,
     references: {
@@ -33,82 +32,43 @@ const ChatRoom = sequelize.define('ChatRoom', {
       key: 'id'
     }
   },
-  last_message: {
+  lastMessageId: {
+    type: DataTypes.UUID,
+    allowNull: true
+  },
+  lastMessageContent: {
     type: DataTypes.TEXT,
     allowNull: true
   },
-  last_message_time: {
+  lastMessageTime: {
     type: DataTypes.DATE,
     allowNull: true
   },
-  employer_unread_count: {
+  employerUnreadCount: {
     type: DataTypes.INTEGER,
     defaultValue: 0
   },
-  seeker_unread_count: {
+  seekerUnreadCount: {
     type: DataTypes.INTEGER,
     defaultValue: 0
-  }
-});
-
-// 聊天消息模型
-const ChatMessage = sequelize.define('ChatMessage', {
-  id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
   },
-  room_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: ChatRoom,
-      key: 'id'
-    }
+  status: {
+    type: DataTypes.ENUM('active', 'archived'),
+    defaultValue: 'active'
   },
-  sender_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: User,
-      key: 'id'
-    }
-  },
-  message_type: {
-    type: DataTypes.ENUM('text', 'image', 'file', 'system'),
-    defaultValue: 'text'
-  },
-  content: {
-    type: DataTypes.TEXT,
-    allowNull: false
-  },
-  file_url: {
-    type: DataTypes.STRING,
-    allowNull: true
-  },
-  is_read: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false
-  },
-  read_at: {
+  createdAt: {
     type: DataTypes.DATE,
-    allowNull: true
+    allowNull: false,
+    defaultValue: DataTypes.NOW
+  },
+  updatedAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW
   }
+}, {
+  tableName: 'chats',
+  timestamps: true
 });
 
-// 关联关系
-User.hasMany(ChatRoom, { foreignKey: 'employer_id', as: 'employerChatRooms' });
-User.hasMany(ChatRoom, { foreignKey: 'seeker_id', as: 'seekerChatRooms' });
-ChatRoom.belongsTo(User, { foreignKey: 'employer_id', as: 'employer' });
-ChatRoom.belongsTo(User, { foreignKey: 'seeker_id', as: 'seeker' });
-
-ChatRoom.hasMany(ChatMessage, { foreignKey: 'room_id', as: 'messages' });
-ChatMessage.belongsTo(ChatRoom, { foreignKey: 'room_id' });
-
-User.hasMany(ChatMessage, { foreignKey: 'sender_id', as: 'sentMessages' });
-ChatMessage.belongsTo(User, { foreignKey: 'sender_id', as: 'sender' });
-
-module.exports = {
-  ChatRoom,
-  ChatMessage
-}; 
+module.exports = Chat; 
